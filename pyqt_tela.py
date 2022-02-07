@@ -1,9 +1,11 @@
 from PyQt5 import uic, QtWidgets, QtGui
-from cv2 import QT_CHECKBOX
 import mysql.connector
 #from reportlab.pdfgen import canvas
+from fpdf import FPDF
 import random
+import pandas as pd
 
+# Conectando o codigo com o banco de dados MySQL
 db = mysql.connector.connect(
     host     = "localhost",
     user     = "root",
@@ -11,8 +13,40 @@ db = mysql.connector.connect(
     database = "cadastro_lanches"
 )
 
-def geraPdf():
-    print('GERAR PDF')
+# Definindo a geracao do PDF do relatorio
+
+def geraCSV():
+    pinicio = listagem.linePeriodoInicio.text()
+    pfinal = listagem.linePeriodoFinal.text()
+    if len(pinicio) != 0 and len(pfinal) != 0:
+        cursor = db.cursor()
+        comandoBusca = "SELECT id, codigo, nome, descricao, Total FROM pedidos WHERE (data BETWEEN "
+        comandoBusca += "'" + str(pinicio) + "'"
+        comandoBusca += " AND '"
+        comandoBusca += str(pfinal) + "');" 
+        cursor.execute(comandoBusca)
+        resultBusca = cursor.fetchall()
+        df = pd.DataFrame(resultBusca,columns=['id','codigo','nome','descricao','Total'])
+        df.to_csv('Planilha_Relatorio_Pedidos.csv')
+
+def geraPDF():
+    pinicio = listagem.linePeriodoInicio.text()
+    pfinal = listagem.linePeriodoFinal.text()
+    if len(pinicio) != 0 and len(pfinal) != 0:
+        linhas = pesquisa()
+        pdf = FPDF('P', 'mm', 'A4')
+        pdf.add_page()
+        pdf.set_font('helvetica', '', 14)
+        pdf.cell(200, 10, 'Relatorio de Pedidos',ln=1)
+        for l in linhas:
+            pdf.set_font('helvetica', '', 12)
+            pdf.cell(0,20, f'{l}', ln=True, border=True)
+            # altura_linha+= 10
+        pdf.output('Relatorio_pedidos.pdf')
+
+# Definindo o comportamento para o botao de pesquisa
+def pesquisa():
+    print('PESQUISA realizada')
     
     listagem.tablePedidos.clear()
     listagem.tablePedidos.setHorizontalHeaderLabels(['id', 'codigo', 'nome', 'descricao', 'Total'])
@@ -28,12 +62,17 @@ def geraPdf():
         cursor.execute(comandoBusca)
         resultBusca = cursor.fetchall()
         # print(resultBusca)
+        df = pd.DataFrame(resultBusca,columns=['id','codigo','nome','descricao','Total'])
+        # print(df)
+        df = df.astype(str)
+        lista_pedidos = df.values.tolist()
         print(f'Busca retornada com {len(resultBusca)} registros.')
 
         for i in range(0,len(resultBusca)):
             for j in range(0,5):
                 listagem.tablePedidos.setItem(i,j,QtWidgets.QTableWidgetItem(str(resultBusca[i][j])))
 
+        return lista_pedidos
 
 def listaPedidos():
     print('LISTAGEM')
@@ -316,7 +355,7 @@ def ativaBotaoAdicionar():
 
 
 aplicacao = QtWidgets.QApplication([])
-formulario = uic.loadUi("C:\\Users\\Miguel\\Documents\\Github\\PyQt+MySQL\\tela_vendas.ui")
+formulario = uic.loadUi("C:\\Users\\Miguel\\Documents\\Github\\PyQt+MySQL\\sistema_gui_pymysql\\tela_vendas.ui")
 # configura acoes do botao adicionar
 formulario.btnAdicionar.clicked.connect(ativaBotaoAdicionar)
 # configura acoes do botao finalizar
@@ -326,8 +365,10 @@ inicializaOpcoes()
 
 formulario.btnListar.clicked.connect(listaPedidos)
 
-listagem = uic.loadUi("C:\\Users\\Miguel\\Documents\\Github\\PyQt+MySQL\\tela_lista.ui")
-listagem.btnPesquisa.clicked.connect(geraPdf)
+listagem = uic.loadUi("C:\\Users\\Miguel\\Documents\\Github\\PyQt+MySQL\\sistema_gui_pymysql\\tela_lista.ui")
+listagem.btnPesquisa.clicked.connect(pesquisa)
+listagem.btnGeraPDF.clicked.connect(geraPDF)
+listagem.btnGeraCSV.clicked.connect(geraCSV)
 
 formulario.lineAddPrecoObs.setValidator(QtGui.QDoubleValidator(
                 0.0, # bottom
