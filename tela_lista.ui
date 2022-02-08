@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>835</width>
+    <width>813</width>
     <height>600</height>
    </rect>
   </property>
@@ -43,22 +43,31 @@
      <rect>
       <x>60</x>
       <y>430</y>
-      <width>241</width>
+      <width>261</width>
       <height>31</height>
      </rect>
     </property>
     <layout class="QHBoxLayout" name="horizontalLayout">
      <item>
       <widget class="QLabel" name="labelPeriodoInicio">
+       <property name="maximumSize">
+        <size>
+         <width>100</width>
+         <height>16777215</height>
+        </size>
+       </property>
        <property name="text">
         <string>Período de início:</string>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QLineEdit" name="linePeriodoInicio">
-       <property name="styleSheet">
-        <string notr="true">background-color: rgb(255, 255, 255);</string>
+      <widget class="QDateTimeEdit" name="datePeriodoInicio">
+       <property name="maximumSize">
+        <size>
+         <width>130</width>
+         <height>16777215</height>
+        </size>
        </property>
       </widget>
      </item>
@@ -69,22 +78,31 @@
      <rect>
       <x>320</x>
       <y>430</y>
-      <width>241</width>
+      <width>231</width>
       <height>31</height>
      </rect>
     </property>
     <layout class="QHBoxLayout" name="horizontalLayout_2">
      <item>
       <widget class="QLabel" name="labelPeriodoFinal">
+       <property name="maximumSize">
+        <size>
+         <width>100</width>
+         <height>16777215</height>
+        </size>
+       </property>
        <property name="text">
         <string>Período final: </string>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QLineEdit" name="linePeriodoFinal">
-       <property name="styleSheet">
-        <string notr="true">background-color: rgb(255, 255, 255);</string>
+      <widget class="QDateTimeEdit" name="datePeriodoFinal">
+       <property name="maximumSize">
+        <size>
+         <width>130</width>
+         <height>16777215</height>
+        </size>
        </property>
       </widget>
      </item>
@@ -93,7 +111,7 @@
    <widget class="QPushButton" name="btnPesquisa">
     <property name="geometry">
      <rect>
-      <x>580</x>
+      <x>600</x>
       <y>430</y>
       <width>131</width>
       <height>28</height>
@@ -115,7 +133,7 @@
    <widget class="QPushButton" name="btnGeraCSV">
     <property name="geometry">
      <rect>
-      <x>580</x>
+      <x>160</x>
       <y>510</y>
       <width>131</width>
       <height>28</height>
@@ -139,7 +157,7 @@
      <rect>
       <x>50</x>
       <y>81</y>
-      <width>631</width>
+      <width>681</width>
       <height>321</height>
      </rect>
     </property>
@@ -175,15 +193,15 @@
    <widget class="QPushButton" name="btnGeraPDF">
     <property name="geometry">
      <rect>
-      <x>580</x>
-      <y>470</y>
-      <width>131</width>
+      <x>60</x>
+      <y>510</y>
+      <width>81</width>
       <height>28</height>
      </rect>
     </property>
     <property name="minimumSize">
      <size>
-      <width>120</width>
+      <width>80</width>
       <height>0</height>
      </size>
     </property>
@@ -194,13 +212,49 @@
      <string>GERAR PDF</string>
     </property>
    </widget>
+   <widget class="QLabel" name="labelLucro">
+    <property name="geometry">
+     <rect>
+      <x>644</x>
+      <y>510</y>
+      <width>91</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>9</pointsize>
+      <weight>75</weight>
+      <bold>true</bold>
+     </font>
+    </property>
+    <property name="text">
+     <string>R$ 0.00</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="btnLucro">
+    <property name="geometry">
+     <rect>
+      <x>610</x>
+      <y>470</y>
+      <width>121</width>
+      <height>28</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">background-color: rgb(181, 207, 255);</string>
+    </property>
+    <property name="text">
+     <string>CALCULAR LUCRO</string>
+    </property>
+   </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>835</width>
+     <width>813</width>
      <height>26</height>
     </rect>
    </property>

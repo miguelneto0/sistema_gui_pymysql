@@ -1,4 +1,4 @@
-from PyQt5 import uic, QtWidgets, QtGui
+from PyQt5 import uic, QtWidgets, QtGui, QtCore
 import mysql.connector
 #from reportlab.pdfgen import canvas
 from fpdf import FPDF
@@ -15,9 +15,33 @@ db = mysql.connector.connect(
 
 # Definindo a geracao do PDF do relatorio
 
+def calculaLucro():
+    print('CALCULA VALOR')
+    listagem.datePeriodoInicio.setDisplayFormat("yyyy-MM-dd hh:mm")
+    listagem.datePeriodoFinal.setDisplayFormat("yyyy-MM-dd hh:mm")
+    dtinicio = listagem.datePeriodoInicio.dateTime()
+    dtfinal  = listagem.datePeriodoFinal.dateTime()
+    pinicio = dtinicio.toString(listagem.datePeriodoInicio.displayFormat())
+    pfinal = dtfinal.toString(listagem.datePeriodoFinal.displayFormat())
+    if len(pinicio) != 0 and len(pfinal) != 0:
+        cursor = db.cursor()
+        comandoSoma = "SELECT SUM(Total) FROM pedidos WHERE (data BETWEEN "
+        comandoSoma += "'" + str(pinicio) + "'"
+        comandoSoma += " AND '"
+        comandoSoma += str(pfinal) + "');" 
+        cursor.execute(comandoSoma)
+        resultSoma = cursor.fetchall()
+        print(type(resultSoma))
+        listagem.labelLucro.setText("Total: " + str(resultSoma[0][0]))
+        listagem.labelLucro.setStyleSheet('QLabel {font:bold,font-size:14}')
+
 def geraCSV():
-    pinicio = listagem.linePeriodoInicio.text()
-    pfinal = listagem.linePeriodoFinal.text()
+    listagem.datePeriodoInicio.setDisplayFormat("yyyy-MM-dd hh:mm")
+    listagem.datePeriodoFinal.setDisplayFormat("yyyy-MM-dd hh:mm")
+    dtinicio = listagem.datePeriodoInicio.dateTime()
+    dtfinal  = listagem.datePeriodoFinal.dateTime()
+    pinicio = dtinicio.toString(listagem.datePeriodoInicio.displayFormat())
+    pfinal = dtfinal.toString(listagem.datePeriodoFinal.displayFormat())
     if len(pinicio) != 0 and len(pfinal) != 0:
         cursor = db.cursor()
         comandoBusca = "SELECT id, codigo, nome, descricao, Total FROM pedidos WHERE (data BETWEEN "
@@ -30,14 +54,18 @@ def geraCSV():
         df.to_csv('Planilha_Relatorio_Pedidos.csv')
 
 def geraPDF():
-    pinicio = listagem.linePeriodoInicio.text()
-    pfinal = listagem.linePeriodoFinal.text()
+    listagem.datePeriodoInicio.setDisplayFormat("yyyy-MM-dd hh:mm")
+    listagem.datePeriodoFinal.setDisplayFormat("yyyy-MM-dd hh:mm")
+    dtinicio = listagem.datePeriodoInicio.dateTime()
+    dtfinal  = listagem.datePeriodoFinal.dateTime()
+    pinicio = dtinicio.toString(listagem.datePeriodoInicio.displayFormat())
+    pfinal = dtfinal.toString(listagem.datePeriodoFinal.displayFormat())
     if len(pinicio) != 0 and len(pfinal) != 0:
         linhas = pesquisa()
         pdf = FPDF('P', 'mm', 'A4')
         pdf.add_page()
         pdf.set_font('helvetica', '', 14)
-        pdf.cell(200, 10, 'Relatorio de Pedidos',ln=1)
+        pdf.cell(200, 10, 'Relatorio de Pedidos',ln=1, align='C')
         for l in linhas:
             pdf.set_font('helvetica', '', 12)
             pdf.cell(0,20, f'{l}', ln=True, border=True)
@@ -50,10 +78,18 @@ def pesquisa():
     
     listagem.tablePedidos.clear()
     listagem.tablePedidos.setHorizontalHeaderLabels(['id', 'codigo', 'nome', 'descricao', 'Total'])
-
-    pinicio = listagem.linePeriodoInicio.text()
-    pfinal = listagem.linePeriodoFinal.text()
+    
+    listagem.datePeriodoInicio.setDisplayFormat("yyyy-MM-dd hh:mm")
+    listagem.datePeriodoFinal.setDisplayFormat("yyyy-MM-dd hh:mm")
+    dtinicio = listagem.datePeriodoInicio.dateTime()
+    dtfinal  = listagem.datePeriodoFinal.dateTime()
+    pinicio = dtinicio.toString(listagem.datePeriodoInicio.displayFormat())
+    pfinal = dtfinal.toString(listagem.datePeriodoFinal.displayFormat())
+    print(f'Inicio: {pinicio} \t Final: {pfinal}')
+    # pinicio = listagem.linePeriodoInicio.text()
+    # pfinal = listagem.linePeriodoFinal.text()
     if len(pinicio) != 0 and len(pfinal) != 0:
+    # if len(dt_stringFIN) != 0 and len(dt_stringINI) != 0:
         cursor = db.cursor()
         comandoBusca = "SELECT id, codigo, nome, descricao, Total FROM pedidos WHERE (data BETWEEN "
         comandoBusca += "'" + str(pinicio) + "'"
@@ -63,7 +99,7 @@ def pesquisa():
         resultBusca = cursor.fetchall()
         # print(resultBusca)
         df = pd.DataFrame(resultBusca,columns=['id','codigo','nome','descricao','Total'])
-        # print(df)
+        print(df)
         df = df.astype(str)
         lista_pedidos = df.values.tolist()
         print(f'Busca retornada com {len(resultBusca)} registros.')
@@ -369,11 +405,17 @@ listagem = uic.loadUi("C:\\Users\\Miguel\\Documents\\Github\\PyQt+MySQL\\sistema
 listagem.btnPesquisa.clicked.connect(pesquisa)
 listagem.btnGeraPDF.clicked.connect(geraPDF)
 listagem.btnGeraCSV.clicked.connect(geraCSV)
+listagem.btnLucro.clicked.connect(calculaLucro)
+
+listagem.datePeriodoInicio.setDateTime(QtCore.QDateTime.currentDateTime())
+listagem.datePeriodoInicio.setDisplayFormat("dd/MM/yyyy hh:mm")
+listagem.datePeriodoFinal.setDateTime(QtCore.QDateTime.currentDateTime())
+listagem.datePeriodoFinal.setDisplayFormat("dd/MM/yyyy hh:mm")
 
 formulario.lineAddPrecoObs.setValidator(QtGui.QDoubleValidator(
-                0.0, # bottom
-                100.0, # top
-                2, # decimals 
+                0.0,    # minimo
+                100.0,  # maximo
+                2,      # casa decimais 
                 notation=QtGui.QDoubleValidator.StandardNotation
             ))
 
