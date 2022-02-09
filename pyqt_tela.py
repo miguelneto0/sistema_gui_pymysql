@@ -13,27 +13,30 @@ db = mysql.connector.connect(
     database = "cadastro_lanches"
 )
 
+ultimaBusca = ""
+
 # Definindo a geracao do PDF do relatorio
 
 def calculaLucro():
+    lucroFloat = 0.0
+    lucro = ""
+
     print('CALCULA VALOR')
-    listagem.datePeriodoInicio.setDisplayFormat("yyyy-MM-dd hh:mm")
-    listagem.datePeriodoFinal.setDisplayFormat("yyyy-MM-dd hh:mm")
-    dtinicio = listagem.datePeriodoInicio.dateTime()
-    dtfinal  = listagem.datePeriodoFinal.dateTime()
-    pinicio = dtinicio.toString(listagem.datePeriodoInicio.displayFormat())
-    pfinal = dtfinal.toString(listagem.datePeriodoFinal.displayFormat())
-    if len(pinicio) != 0 and len(pfinal) != 0:
-        cursor = db.cursor()
-        comandoSoma = "SELECT SUM(Total) FROM pedidos WHERE (data BETWEEN "
-        comandoSoma += "'" + str(pinicio) + "'"
-        comandoSoma += " AND '"
-        comandoSoma += str(pfinal) + "');" 
-        cursor.execute(comandoSoma)
-        resultSoma = cursor.fetchall()
-        print(type(resultSoma))
-        listagem.labelLucro.setText("Total: " + str(resultSoma[0][0]))
-        listagem.labelLucro.setStyleSheet('QLabel {font:bold,font-size:14}')
+    for i in range(listagem.tablePedidos.rowCount()):
+        for j in range(listagem.tablePedidos.columnCount()):
+            # leitura = listagem.tablePedidos.cellWidget(i,j).text()
+            leitura = listagem.tablePedidos.item(i,j)
+            if leitura != None and j==4:
+                # print(f' [{i}][{j}] = {leitura.text()}')
+                lucroFloat += float(listagem.tablePedidos.item(i,j).text())
+                lucro += listagem.tablePedidos.item(i,j).text()
+                # print(lucro)
+                # lucroFloat += float(lucro)
+    # print(lucro)
+    print(lucroFloat)
+    listagem.labelLucro.setText("R$ " + str(lucroFloat))
+    listagem.labelLucro.setStyleSheet('QLabel {font:bold,font-size:14}')
+
 
 def geraCSV():
     listagem.datePeriodoInicio.setDisplayFormat("yyyy-MM-dd hh:mm")
@@ -85,6 +88,7 @@ def pesquisa():
     dtfinal  = listagem.datePeriodoFinal.dateTime()
     pinicio = dtinicio.toString(listagem.datePeriodoInicio.displayFormat())
     pfinal = dtfinal.toString(listagem.datePeriodoFinal.displayFormat())
+    
     print(f'Inicio: {pinicio} \t Final: {pfinal}')
     # pinicio = listagem.linePeriodoInicio.text()
     # pfinal = listagem.linePeriodoFinal.text()
@@ -103,19 +107,109 @@ def pesquisa():
         df = df.astype(str)
         lista_pedidos = df.values.tolist()
         print(f'Busca retornada com {len(resultBusca)} registros.')
+        listagem.labelDebug.setText('Busca retornada com ' + str(len(resultBusca)) + ' registros.')
 
         for i in range(0,len(resultBusca)):
             for j in range(0,5):
                 listagem.tablePedidos.setItem(i,j,QtWidgets.QTableWidgetItem(str(resultBusca[i][j])))
-
+        ultimaBusca = str(resultBusca)
         return lista_pedidos
+
+
+def pesquisaNome():
+    print('PESQUISA-NOME realizada')
+    
+    listagem.tablePedidos.clear()
+    listagem.tablePedidos.setHorizontalHeaderLabels(['id', 'codigo', 'nome', 'descricao', 'Total'])
+
+    nomeProc = listagem.lineNomeProc.text()
+    
+    if len(nomeProc) != 0:
+    # if len(dt_stringFIN) != 0 and len(dt_stringINI) != 0:
+        cursor = db.cursor()
+        comandoBusca = "SELECT id, codigo, nome, descricao, Total FROM pedidos WHERE nome LIKE "
+        comandoBusca += "'%" + str(nomeProc) + "%'"
+        comandoBusca += ";" 
+        cursor.execute(comandoBusca)
+        resultBusca = cursor.fetchall()
+        # print(resultBusca)
+        df = pd.DataFrame(resultBusca,columns=['id','codigo','nome','descricao','Total'])
+        print(df)
+        df = df.astype(str)
+        lista_pedidos = df.values.tolist()
+        print(f'Busca retornada com {len(resultBusca)} registros.')
+        listagem.labelDebug.setText('Busca retornada com ' + str(len(resultBusca)) + ' registros.')
+
+        for i in range(0,len(resultBusca)):
+            for j in range(0,5):
+                listagem.tablePedidos.setItem(i,j,QtWidgets.QTableWidgetItem(str(resultBusca[i][j])))
+        return lista_pedidos
+
+def pesquisaCod():
+    print('PESQUISA-COD realizada')
+    
+    listagem.tablePedidos.clear()
+    listagem.tablePedidos.setHorizontalHeaderLabels(['id', 'codigo', 'nome', 'descricao', 'Total'])
+
+    codProc = listagem.lineCodigoProc.text()
+    
+    if len(codProc) != 0:
+    # if len(dt_stringFIN) != 0 and len(dt_stringINI) != 0:
+        cursor = db.cursor()
+        comandoBusca = "SELECT id, codigo, nome, descricao, Total FROM pedidos WHERE codigo LIKE "
+        comandoBusca += "'%" + str(codProc) + "%'"
+        comandoBusca += ";" 
+        cursor.execute(comandoBusca)
+        resultBusca = cursor.fetchall()
+        # print(resultBusca)
+        df = pd.DataFrame(resultBusca,columns=['id','codigo','nome','descricao','Total'])
+        print(df)
+        df = df.astype(str)
+        lista_pedidos = df.values.tolist()
+        print(f'Busca retornada com {len(resultBusca)} registros.')
+        listagem.labelDebug.setText('Busca retornada com ' + str(len(resultBusca)) + ' registros.')
+
+        for i in range(0,len(resultBusca)):
+            for j in range(0,5):
+                listagem.tablePedidos.setItem(i,j,QtWidgets.QTableWidgetItem(str(resultBusca[i][j])))
+        return lista_pedidos
+
+def pesquisaDescr():
+    print('PESQUISA-DESCR realizada')
+    
+    listagem.tablePedidos.clear()
+    listagem.tablePedidos.setHorizontalHeaderLabels(['id', 'codigo', 'nome', 'descricao', 'Total'])
+
+    descrProc = listagem.lineDescricaoProc.text()
+    
+    if len(descrProc) != 0:
+    # if len(dt_stringFIN) != 0 and len(dt_stringINI) != 0:
+        cursor = db.cursor()
+        comandoBusca = "SELECT id, codigo, nome, descricao, Total FROM pedidos WHERE descricao LIKE "
+        comandoBusca += "'%" + str(descrProc) + "%'"
+        comandoBusca += ";" 
+        cursor.execute(comandoBusca)
+        resultBusca = cursor.fetchall()
+        # print(resultBusca)
+        df = pd.DataFrame(resultBusca,columns=['id','codigo','nome','descricao','Total'])
+        print(df)
+        df = df.astype(str)
+        lista_pedidos = df.values.tolist()
+        print(f'Busca retornada com {len(resultBusca)} registros.')
+        listagem.labelDebug.setText('Busca retornada com ' + str(len(resultBusca)) + ' registros.')
+
+        for i in range(0,len(resultBusca)):
+            for j in range(0,5):
+                listagem.tablePedidos.setItem(i,j,QtWidgets.QTableWidgetItem(str(resultBusca[i][j])))
+        return lista_pedidos
+
 
 def listaPedidos():
     print('LISTAGEM')
     listagem.show()
 
     cursor = db.cursor()
-    comandoLista = "SELECT id, codigo, nome, descricao, Total FROM pedidos"
+    comandoLista = "SELECT id, codigo, nome, descricao, Total FROM pedidos;"
     cursor.execute(comandoLista)
     pedidosLista = cursor.fetchall()
     # for i in pedidosLista:
@@ -399,13 +493,19 @@ formulario.btnFinalizar.clicked.connect(ativaBotaoFinalizar)
 # incializa as funcoes dos Widgets
 inicializaOpcoes()
 
+
 formulario.btnListar.clicked.connect(listaPedidos)
+
+ultimaBusca = ""
 
 listagem = uic.loadUi("C:\\Users\\Miguel\\Documents\\Github\\PyQt+MySQL\\sistema_gui_pymysql\\tela_lista.ui")
 listagem.btnPesquisa.clicked.connect(pesquisa)
 listagem.btnGeraPDF.clicked.connect(geraPDF)
 listagem.btnGeraCSV.clicked.connect(geraCSV)
 listagem.btnLucro.clicked.connect(calculaLucro)
+listagem.btnNomePesq.clicked.connect(pesquisaNome)
+listagem.btnCodPesq.clicked.connect(pesquisaCod)
+listagem.btnDescrPesq.clicked.connect(pesquisaDescr)
 
 listagem.datePeriodoInicio.setDateTime(QtCore.QDateTime.currentDateTime())
 listagem.datePeriodoInicio.setDisplayFormat("dd/MM/yyyy hh:mm")
