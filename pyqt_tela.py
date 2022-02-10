@@ -15,8 +15,6 @@ db = mysql.connector.connect(
     database = "cadastro_lanches"
 )
 
-ultimaBusca = ""
-
 # Definindo o calculo do lucro para a tabela atualizada
 def calculaLucro():
     lucroFloat = 0.0
@@ -479,28 +477,84 @@ def ativaBotaoAdicionar():
 def botaoLogin():
     log = login.lineUser.text()
     psw = login.linePasswd.text()
-
-    if len(log) != 0 and len(psw) != 0:
-        cursor = db.cursor()
-        comandoBusca = "SELECT nome,senha FROM admins WHERE nome="
-        comandoBusca += "'" + str(log) + "'"
-        cursor.execute(comandoBusca)
-        resultBusca = cursor.fetchall()
-        print(resultBusca)
-        # print(resultBusca[0][0])
-        # print(resultBusca[0][1])
-        if log == resultBusca[0][0] and psw == resultBusca[0][1]:
-            print(f'{log} logado com sucesso.')
-            formulario.labelRastreioLogin.setText("Logado como " + str(log) + ".")
-            login.close()
-            formulario.show()
+    conf= login.lineConfirma.text()
+    
+    if len(log) == 0:
+        login.labelNotificacao.setText("Usuario nao pode ser vazio.")
+        login.labelNotificacao.setStyleSheet('QLabel {color: #ff0000}')
+    elif len(psw) == 0:
+        login.labelNotificacao.setText("Senha nao pode ser vazia.")
+        login.labelNotificacao.setStyleSheet('QLabel {color: #ff0000}')
+    else:
+        if login.lineConfirma.isVisible() and len(conf)!=0:
+            if len(log) != 0:
+                cursor = db.cursor()
+                comandoBusca = "SELECT nome FROM admins WHERE nome="
+                comandoBusca += "'" + str(log) + "';"
+                cursor.execute(comandoBusca)
+                resultBusca = cursor.fetchall()
+                print(len(resultBusca))
+                if len(resultBusca) != 0:
+                    print('Ja existe usuario com este nome.')
+                    login.labelNotificacao.setText('Usuario ja existe.')
+                    login.labelNotificacao.setStyleSheet('QLabel {color: #ff0000}')
+                else:
+                    if conf == psw:
+                        cursor = db.cursor()
+                        comandoInsere = "INSERT INTO admins(nome,senha) VALUES ("
+                        comandoInsere += "'" + str(log) + "','" + str(psw) + "');"
+                        cursor.execute(comandoInsere)
+                        db.commit()
+                        
+                        login.labelConfirma.setVisible(False)
+                        login.lineConfirma.setVisible(False)
+                        login.btnLogin.setText('LOGIN')
+                        login.labelNotificacao.setText('Usuario cadastrado com sucesso.')
+                        login.labelNotificacao.setStyleSheet('QLabel {color:#00ffaa}')
+                        login.lineUser.setText('')
+                        login.linePasswd.setText('')
+                        # print('cria usuario sql e hide label e notifica sucesso')
+                    else:
+                        print('As senhas nao coincidem')
+                        login.labelNotificacao.setText('As senhas nao coincidem')
+                        login.labelNotificacao.setStyleSheet('QLabel {color: #ff0000}')
+        elif login.lineConfirma.isVisible() and len(conf) == 0:
+            print('As senhas nao coincidem')
+            login.labelNotificacao.setText('As senhas nao coincidem')
+            login.labelNotificacao.setStyleSheet('QLabel {color: #ff0000}')
         else:
-            login.labelNotificacao.setText("Usuario ou senha incorretos.")
+            if len(log) != 0 and len(psw) != 0:
+                cursor = db.cursor()
+                comandoBusca = "SELECT nome,senha FROM admins WHERE nome="
+                comandoBusca += "'" + str(log) + "'"
+                cursor.execute(comandoBusca)
+                resultBusca = cursor.fetchall()
+                print(resultBusca)
+                # print(resultBusca[0][0])
+                # print(resultBusca[0][1])
+                if log == resultBusca[0][0] and psw == resultBusca[0][1]:
+                    print(f'{log} logado com sucesso.')
+                    formulario.labelRastreioLogin.setText("Logado como " + str(log) + ".")
+                    login.close()
+                    formulario.show()
+                else:
+                    login.labelNotificacao.setText("Usuario ou senha incorretos.")
 
 # Define o logout do usuario            
 def botaoLogout():
     formulario.close()
     login.show()
+
+def novoUsuario():
+    # print('CADASTRAR NOVO USUARIO')
+    if login.labelConfirma.isVisible() == True and login.lineConfirma.isVisible() == True:
+        login.labelConfirma.hide()
+        login.lineConfirma.hide()
+        login.btnLogin.setText("LOGIN")
+    else:
+        login.labelConfirma.show()
+        login.lineConfirma.show()
+        login.btnLogin.setText("CADASTRAR")
 
 ## ##################################################################
 ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -  
@@ -508,10 +562,14 @@ def botaoLogout():
 
 aplicacao = QtWidgets.QApplication([])
 login = uic.loadUi("C:\\Users\\Miguel\\Documents\\Github\\PyQt+MySQL\\sistema_gui_pymysql\\tela_login.ui")
-
+login.labelConfirma.hide()
+login.lineConfirma.hide()
 login.linePasswd.setEchoMode(QtWidgets.QLineEdit.Password)
 login.btnLogin.clicked.connect(botaoLogin)
+# login.labelNovoUsuario.mousePressEvent = novoUsuario
+login.btnNovoUsuario.clicked.connect(novoUsuario)
 
+# define o objeto que vai utilizar a tela criada no QtDesigner
 formulario = uic.loadUi("C:\\Users\\Miguel\\Documents\\Github\\PyQt+MySQL\\sistema_gui_pymysql\\tela_vendas.ui")
 # configura acoes do botao adicionar
 formulario.btnAdicionar.clicked.connect(ativaBotaoAdicionar)
