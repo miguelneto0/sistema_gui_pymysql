@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1107</width>
-    <height>766</height>
+    <height>782</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -1062,6 +1062,35 @@
     </property>
     <property name="text">
      <string>LISTAR PEDIDOS</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="btnLogout">
+    <property name="geometry">
+     <rect>
+      <x>990</x>
+      <y>690</y>
+      <width>93</width>
+      <height>28</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">background-color: rgb(255, 0, 81);</string>
+    </property>
+    <property name="text">
+     <string>Log out</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="labelRastreioLogin">
+    <property name="geometry">
+     <rect>
+      <x>870</x>
+      <y>700</y>
+      <width>111</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string/>
     </property>
    </widget>
   </widget>

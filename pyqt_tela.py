@@ -1,5 +1,6 @@
 from re import search
 from PyQt5 import uic, QtWidgets, QtGui, QtCore
+from matplotlib import font_manager
 import mysql.connector
 #from reportlab.pdfgen import canvas
 from fpdf import FPDF
@@ -16,8 +17,7 @@ db = mysql.connector.connect(
 
 ultimaBusca = ""
 
-# Definindo a geracao do PDF do relatorio
-
+# Definindo o calculo do lucro para a tabela atualizada
 def calculaLucro():
     lucroFloat = 0.0
     lucro = ""
@@ -35,7 +35,7 @@ def calculaLucro():
     listagem.labelLucro.setText("R$ " + str(lucroFloat))
     listagem.labelLucro.setStyleSheet('Label {font:bold,font-size:14}')
 
-
+# Definindo a geracao de Planilha em .CSV para Relatorios e Analises
 def geraCSV():
     listagem.datePeriodoInicio.setDisplayFormat("yyyy-MM-dd hh:mm")
     listagem.datePeriodoFinal.setDisplayFormat("yyyy-MM-dd hh:mm")
@@ -54,6 +54,7 @@ def geraCSV():
         df = pd.DataFrame(resultBusca,columns=['id','codigo','nome','descricao','Total'])
         df.to_csv('Planilha_Relatorio_Pedidos.csv')
 
+# Definindo a geracao do PDF do relatorio
 def geraPDF():
     listagem.datePeriodoInicio.setDisplayFormat("yyyy-MM-dd hh:mm")
     listagem.datePeriodoFinal.setDisplayFormat("yyyy-MM-dd hh:mm")
@@ -113,7 +114,7 @@ def pesquisa():
         ultimaBusca = str(resultBusca)
         return lista_pedidos
 
-
+# Definindo a busca por nome de cliente
 def pesquisaNome():
     print('PESQUISA-NOME realizada')
     
@@ -143,6 +144,7 @@ def pesquisaNome():
                 listagem.tablePedidos.setItem(i,j,QtWidgets.QTableWidgetItem(str(resultBusca[i][j])))
         return lista_pedidos
 
+# Definindo a busca por codigo de cliente
 def pesquisaCod():
     print('PESQUISA-COD realizada')
     
@@ -172,6 +174,7 @@ def pesquisaCod():
                 listagem.tablePedidos.setItem(i,j,QtWidgets.QTableWidgetItem(str(resultBusca[i][j])))
         return lista_pedidos
 
+# Definindo a busca por descricao do pedido de cliente
 def pesquisaDescr():
     print('PESQUISA-DESCR realizada')
     
@@ -201,7 +204,7 @@ def pesquisaDescr():
                 listagem.tablePedidos.setItem(i,j,QtWidgets.QTableWidgetItem(str(resultBusca[i][j])))
         return lista_pedidos
 
-
+# Definindo o preenchimento da tabela com os pedidos
 def listaPedidos():
     print('LISTAGEM')
     listagem.show()
@@ -334,6 +337,7 @@ def inicializaOpcoes():
     formulario.radio1lit.stateChanged.connect(checkBebidas)
     formulario.radio2lit.stateChanged.connect(checkBebidas)
 
+# Define o cadastro do pedido do cliente
 def ativaBotaoFinalizar():
     observ = "TESTE"
     nome,burg,mis,hot,add,beb,ped,tot = ativaBotaoAdicionar()
@@ -344,17 +348,7 @@ def ativaBotaoFinalizar():
     db.commit()
     print('Dados cadastrados no Banco de Dados')
 
-    #    formulario.restoreState()
-    # Percorre todos os elementos e reseta
-    # for i in range(formulario.find()): # veriricar o similar ao count()
-    #     item = formulario.itemAt(i).widget()
-    #     if isinstance(item,QtWidgets.QCheckBox):
-    #         item.setChecked(False)
-    #     if isinstance(item,QtWidgets.QSpinBox):
-    #         item.setValue(0)
-    #     if isinstance(item,QtWidgets.QLineEdit):
-    #         item.setText("")
-
+# Define o preenchimento do carrinho
 def ativaBotaoAdicionar():
     nome = formulario.lineNome.text()
     burgers = 0
@@ -481,8 +475,43 @@ def ativaBotaoAdicionar():
         # CRIAR A OBSERVACAO COM CAMPO
         return nome, burgers, misto, hotdog, adic, bebida,  pedido, total
 
+# Define o Login dos usuarios cadastrados
+def botaoLogin():
+    log = login.lineUser.text()
+    psw = login.linePasswd.text()
+
+    if len(log) != 0 and len(psw) != 0:
+        cursor = db.cursor()
+        comandoBusca = "SELECT nome,senha FROM admins WHERE nome="
+        comandoBusca += "'" + str(log) + "'"
+        cursor.execute(comandoBusca)
+        resultBusca = cursor.fetchall()
+        print(resultBusca)
+        # print(resultBusca[0][0])
+        # print(resultBusca[0][1])
+        if log == resultBusca[0][0] and psw == resultBusca[0][1]:
+            print(f'{log} logado com sucesso.')
+            formulario.labelRastreioLogin.setText("Logado como " + str(log) + ".")
+            login.close()
+            formulario.show()
+        else:
+            login.labelNotificacao.setText("Usuario ou senha incorretos.")
+
+# Define o logout do usuario            
+def botaoLogout():
+    formulario.close()
+    login.show()
+
+## ##################################################################
+## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -  
+## ##################################################################
 
 aplicacao = QtWidgets.QApplication([])
+login = uic.loadUi("C:\\Users\\Miguel\\Documents\\Github\\PyQt+MySQL\\sistema_gui_pymysql\\tela_login.ui")
+
+login.linePasswd.setEchoMode(QtWidgets.QLineEdit.Password)
+login.btnLogin.clicked.connect(botaoLogin)
+
 formulario = uic.loadUi("C:\\Users\\Miguel\\Documents\\Github\\PyQt+MySQL\\sistema_gui_pymysql\\tela_vendas.ui")
 # configura acoes do botao adicionar
 formulario.btnAdicionar.clicked.connect(ativaBotaoAdicionar)
@@ -490,31 +519,31 @@ formulario.btnAdicionar.clicked.connect(ativaBotaoAdicionar)
 formulario.btnFinalizar.clicked.connect(ativaBotaoFinalizar)
 # incializa as funcoes dos Widgets
 inicializaOpcoes()
-
-
+# configura a acao de chamada da janela de pedidos
 formulario.btnListar.clicked.connect(listaPedidos)
+# configura a acao de chamada da janela de pedidos
+formulario.btnLogout.clicked.connect(botaoLogout)
 
-ultimaBusca = ""
 
 listagem = uic.loadUi("C:\\Users\\Miguel\\Documents\\Github\\PyQt+MySQL\\sistema_gui_pymysql\\tela_lista.ui")
 listagem.btnPesquisa.clicked.connect(pesquisa)
 listagem.btnGeraPDF.clicked.connect(geraPDF)
-pdfIcon = QtGui.QIcon("images/pdf-icon.png")
-listagem.btnGeraPDF.setIcon(QtGui.QIcon(pdfIcon))
 listagem.btnGeraCSV.clicked.connect(geraCSV)
-csvIcon = QtGui.QIcon("images/csv-icon.png")
-listagem.btnGeraCSV.setIcon(QtGui.QIcon(csvIcon))
 listagem.btnLucro.clicked.connect(calculaLucro)
 listagem.btnNomePesq.clicked.connect(pesquisaNome)
+listagem.btnCodPesq.clicked.connect(pesquisaCod)
+listagem.btnDescrPesq.clicked.connect(pesquisaDescr)
+
+pdfIcon = QtGui.QIcon("images/pdf-icon.png")
+csvIcon = QtGui.QIcon("images/csv-icon.png")
 searchIcon = QtGui.QIcon('images/search-icon.png')
+
+listagem.btnGeraCSV.setIcon(QtGui.QIcon(csvIcon))
+listagem.btnGeraPDF.setIcon(QtGui.QIcon(pdfIcon))
 listagem.btnPesquisa.setIcon(QtGui.QIcon(searchIcon))
 listagem.btnNomePesq.setIcon(QtGui.QIcon(searchIcon))
-listagem.btnCodPesq.clicked.connect(pesquisaCod)
 listagem.btnCodPesq.setIcon(QtGui.QIcon(searchIcon))
-listagem.btnDescrPesq.clicked.connect(pesquisaDescr)
 listagem.btnDescrPesq.setIcon(QtGui.QIcon(searchIcon))
-
-
 
 listagem.datePeriodoInicio.setDateTime(QtCore.QDateTime.currentDateTime())
 listagem.datePeriodoInicio.setDisplayFormat("dd/MM/yyyy hh:mm")
@@ -528,7 +557,8 @@ formulario.lineAddPrecoObs.setValidator(QtGui.QDoubleValidator(
                 notation=QtGui.QDoubleValidator.StandardNotation
             ))
 
-formulario.show()
+# formulario.show()
+login.show()
 aplicacao.exec()
 
 ''' id | Codigo | Burgers | Misto | Hotdog | Adicionais | Bebidas | Observacao | Descricao | Total 
