@@ -1,3 +1,4 @@
+from re import search
 from PyQt5 import uic, QtWidgets, QtGui, QtCore
 import mysql.connector
 #from reportlab.pdfgen import canvas
@@ -24,18 +25,15 @@ def calculaLucro():
     print('CALCULA VALOR')
     for i in range(listagem.tablePedidos.rowCount()):
         for j in range(listagem.tablePedidos.columnCount()):
-            # leitura = listagem.tablePedidos.cellWidget(i,j).text()
             leitura = listagem.tablePedidos.item(i,j)
             if leitura != None and j==4:
-                # print(f' [{i}][{j}] = {leitura.text()}')
                 lucroFloat += float(listagem.tablePedidos.item(i,j).text())
                 lucro += listagem.tablePedidos.item(i,j).text()
                 # print(lucro)
                 # lucroFloat += float(lucro)
-    # print(lucro)
     print(lucroFloat)
     listagem.labelLucro.setText("R$ " + str(lucroFloat))
-    listagem.labelLucro.setStyleSheet('QLabel {font:bold,font-size:14}')
+    listagem.labelLucro.setStyleSheet('Label {font:bold,font-size:14}')
 
 
 def geraCSV():
@@ -501,11 +499,22 @@ ultimaBusca = ""
 listagem = uic.loadUi("C:\\Users\\Miguel\\Documents\\Github\\PyQt+MySQL\\sistema_gui_pymysql\\tela_lista.ui")
 listagem.btnPesquisa.clicked.connect(pesquisa)
 listagem.btnGeraPDF.clicked.connect(geraPDF)
+pdfIcon = QtGui.QIcon("images/pdf-icon.png")
+listagem.btnGeraPDF.setIcon(QtGui.QIcon(pdfIcon))
 listagem.btnGeraCSV.clicked.connect(geraCSV)
+csvIcon = QtGui.QIcon("images/csv-icon.png")
+listagem.btnGeraCSV.setIcon(QtGui.QIcon(csvIcon))
 listagem.btnLucro.clicked.connect(calculaLucro)
 listagem.btnNomePesq.clicked.connect(pesquisaNome)
+searchIcon = QtGui.QIcon('images/search-icon.png')
+listagem.btnPesquisa.setIcon(QtGui.QIcon(searchIcon))
+listagem.btnNomePesq.setIcon(QtGui.QIcon(searchIcon))
 listagem.btnCodPesq.clicked.connect(pesquisaCod)
+listagem.btnCodPesq.setIcon(QtGui.QIcon(searchIcon))
 listagem.btnDescrPesq.clicked.connect(pesquisaDescr)
+listagem.btnDescrPesq.setIcon(QtGui.QIcon(searchIcon))
+
+
 
 listagem.datePeriodoInicio.setDateTime(QtCore.QDateTime.currentDateTime())
 listagem.datePeriodoInicio.setDisplayFormat("dd/MM/yyyy hh:mm")
