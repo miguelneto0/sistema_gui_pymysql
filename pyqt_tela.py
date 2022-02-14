@@ -475,31 +475,31 @@ def ativaBotaoAdicionar():
 
 # Define o Login dos usuarios cadastrados
 def botaoLogin():
-    log = login.lineUser.text()
-    psw = login.linePasswd.text()
-    conf= login.lineConfirma.text()
+    log = login.lineUser.text()     # usuario
+    psw = login.linePasswd.text()   # senha
+    conf= login.lineConfirma.text() # confirma senha
     
-    if len(log) == 0:
+    if len(log) == 0:               # usuario vazio
         login.labelNotificacao.setText("Usuario nao pode ser vazio.")
         login.labelNotificacao.setStyleSheet('QLabel {color: #ff0000}')
-    elif len(psw) == 0:
+    elif len(psw) == 0:             # senha vazia
         login.labelNotificacao.setText("Senha nao pode ser vazia.")
         login.labelNotificacao.setStyleSheet('QLabel {color: #ff0000}')
-    else:
-        if login.lineConfirma.isVisible() and len(conf)!=0:
-            if len(log) != 0:
+    else:                           # usuario e senha ok
+        if login.lineConfirma.isVisible() and len(conf)!=0: # cadastro novo
+            if len(log) != 0:       # verificar se usuario valido e nao existente
                 cursor = db.cursor()
                 comandoBusca = "SELECT nome FROM admins WHERE nome="
                 comandoBusca += "'" + str(log) + "';"
                 cursor.execute(comandoBusca)
                 resultBusca = cursor.fetchall()
                 print(len(resultBusca))
-                if len(resultBusca) != 0:
+                if len(resultBusca) != 0:   # ja existe usuario cadastrado
                     print('Ja existe usuario com este nome.')
                     login.labelNotificacao.setText('Usuario ja existe.')
                     login.labelNotificacao.setStyleSheet('QLabel {color: #ff0000}')
-                else:
-                    if conf == psw:
+                else:                       # novo usuario
+                    if conf == psw:         # senha e confirmacao ok
                         cursor = db.cursor()
                         comandoInsere = "INSERT INTO admins(nome,senha) VALUES ("
                         comandoInsere += "'" + str(log) + "','" + str(psw) + "');"
@@ -514,15 +514,15 @@ def botaoLogin():
                         login.lineUser.setText('')
                         login.linePasswd.setText('')
                         # print('cria usuario sql e hide label e notifica sucesso')
-                    else:
+                    else:                   # senhas nao batem
                         print('As senhas nao coincidem')
                         login.labelNotificacao.setText('As senhas nao coincidem')
                         login.labelNotificacao.setStyleSheet('QLabel {color: #ff0000}')
-        elif login.lineConfirma.isVisible() and len(conf) == 0:
+        elif login.lineConfirma.isVisible() and len(conf) == 0:     # confirmacao invalida
             print('As senhas nao coincidem')
             login.labelNotificacao.setText('As senhas nao coincidem')
             login.labelNotificacao.setStyleSheet('QLabel {color: #ff0000}')
-        else:
+        else:                                               # novo login
             if len(log) != 0 and len(psw) != 0:
                 cursor = db.cursor()
                 comandoBusca = "SELECT nome,senha FROM admins WHERE nome="
