@@ -24,6 +24,8 @@ def calculaLucro():
     for i in range(listagem.tablePedidos.rowCount()):
         for j in range(listagem.tablePedidos.columnCount()):
             leitura = listagem.tablePedidos.item(i,j)
+            if leitura == None:
+                print(f'i={i} j={j}')
             if leitura != None and j==4:
                 lucroFloat += float(listagem.tablePedidos.item(i,j).text())
                 lucro += listagem.tablePedidos.item(i,j).text()
@@ -555,6 +557,7 @@ def novoUsuario():
         login.labelConfirma.show()
         login.lineConfirma.show()
         login.btnLogin.setText("CADASTRAR")
+        login.btnNovoUsuario.setText("Já sou cadastrado")
 
 ## ##################################################################
 ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -  
